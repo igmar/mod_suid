@@ -1,0 +1,38 @@
+diff -u --recursive apache_1.3.34.orig/src/main/http_core.c apache_1.3.34/src/main/http_core.c
+--- apache_1.3.34.orig/src/main/http_core.c	2006-04-07 15:37:35.000000000 +0200
++++ apache_1.3.34/src/main/http_core.c	2006-05-29 14:49:26.000000000 +0200
+@@ -2170,21 +2170,6 @@
+ 		    "requires SUEXEC wrapper.\n");
+ 	}
+     }
+-#if !defined (BIG_SECURITY_HOLE) && !defined (OS2)
+-    if (cmd->server->server_uid == 0) {
+-	fprintf(stderr,
+-		"Error:\tApache has not been designed to serve pages while\n"
+-		"\trunning as root.  There are known race conditions that\n"
+-		"\twill allow any local user to read any file on the system.\n"
+-		"\tIf you still desire to serve pages as root then\n"
+-		"\tadd -DBIG_SECURITY_HOLE to the EXTRA_CFLAGS line in your\n"
+-		"\tsrc/Configuration file and rebuild the server.  It is\n"
+-		"\tstrongly suggested that you instead modify the User\n"
+-		"\tdirective in your httpd.conf file to list a non-root\n"
+-		"\tuser.\n");
+-	exit (1);
+-    }
+-#endif
+ #endif /* WIN32 */
+ 
+     return NULL;
+diff -u --recursive apache_1.3.34.orig/src/main/http_main.c apache_1.3.34/src/main/http_main.c
+--- apache_1.3.34.orig/src/main/http_main.c	2005-04-05 14:21:33.000000000 +0200
++++ apache_1.3.34/src/main/http_main.c	2006-05-29 14:49:52.000000000 +0200
+@@ -4137,9 +4137,7 @@
+ #ifdef TPF
+     show_os_specific_compile_settings();
+ #endif
+-#ifdef BIG_SECURITY_HOLE
+     printf(" -D BIG_SECURITY_HOLE\n");
+-#endif
+ #ifdef SECURITY_HOLE_PASS_AUTHORIZATION
+     printf(" -D SECURITY_HOLE_PASS_AUTHORIZATION\n");
+ #endif

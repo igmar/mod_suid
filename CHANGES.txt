@@ -1,0 +1,20 @@
+CHANGES
+-------
+
+1.0
+	Initial release, derived from mod_become
+
+1.1
+	- Removed #ifdef LINUX
+	- Added suid_test.c
+	- Make inline code optional
+	- Added prototypes
+
+2.0
+	- On linux, there is not need to start Apache with User root anymore
+	- We now use lsm_rsuid is detected at runtime
+	- Rewrote most of the code, mainly for cleanups
+
+2.1
+	- Removed the FSUID code, since it doesn't work when we do a
+          privileged bind

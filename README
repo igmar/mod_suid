@@ -1,0 +1,93 @@
+Platforms
+
+This module should work on all platforms supporting setresuid() and setresgid()
+system calls.
+
+This includes Linux, FreeBSD, OpenBSD, HPUX, but probably not all versions.
+
+To see if you actually have a supported OS, simply run the configure script
+
+------------------------------------------------------------------------------
+
+Compilation
+
+Simply do
+
+./configure
+make
+make install (as root)
+
+When configuring, make *sure* it finds the apxs that matches the target apache
+installation.
+------------------------------------------------------------------------------
+
+Usage
+
+Make apache load the module :
+
+LoadModule suid_module      /usr/libexec/apache/mod_suid.so
+
+Make SURE that this is the last LoadModule line in your Apache config, else
+you're at risk that stange thinks will happen.
+
+If you're not on Linux, you need to tell Apache to start as root :
+
+User	root
+Group	root
+
+in your httpd.conf. You will need to recompile apache with -DBIG_SECURITY_HOLE,
+or apache will refuse to start.
+
+If you want extra protection, install the lsm_rsuid kernel module, and
+configure it (DO read the README !!)
+
+In your main config, you must enable the suid module :
+
+ModSuidEnable On
+
+Tell it what user apache normally runs at (nobody, www-data) :
+
+ModSuidApacheUser nobody
+ModSuidApacheGroup nobody
+
+In your vhost config :
+
+SuidEnable      yes
+SuidPolicy      user-group
+Suid            user someuser
+Suid            group somegroup
+
+SuidPolicy can be user-group | file | parent-directory, I
+use user-group myself.
+
+-------------------------------------------------------------------------------
+
+Problems
+
+Apache uses a mutex to make sure only one child does an accept() on a
+connection. The mutex used depends on the system, and what the administrator
+tells it to use.
+
+One some systems, it defaults to SysV, which is bad, since all operations are
+checked with permissions. If you get errors in your logs about the mutex,
+you're probably using SysV.
+
+I suggest you change this to fcntl, using :
+
+AcceptMutex fcntl
+
+in your httpd.conf
+
+-------------------------------------------------------------------------------
+
+WARNING :
+
+This code CAN open up your server to hackers. If you need a secure system,
+DON'T use this module.
+
+I HIGHLY recommend you disable all access to set*uid() and set*gid() functions in scripting languages.
+
+If you want to prevent the apache process for switching to certain UID / GID's,
+use the lsm_rsuid kernel module.
+
+Don't bug me with warnings about how unsafe this is, I know :)

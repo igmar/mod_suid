@@ -1,0 +1,68 @@
+AC_INIT(mod_suid, 2.1, igmar@palsenberg.com)
+AC_CONFIG_SRCDIR(mod_suid.c)
+AC_PROG_CC
+
+AC_CONFIG_HEADER(config.h)
+
+AC_MSG_CHECKING([for a working apxs binary])
+AC_ARG_WITH(apxs, 
+[  --with-apxs[=FILE]	Build shared apache module. FILE is the
+                                optional pathname to the apache apxs tool;
+                                defaults to "apxs".],
+[
+	if test "$withval" = "yes"; then
+		APXS=apxs
+	else
+		APXS="$withval"
+	fi
+],
+[
+	APXS=apxs
+])
+
+if test -n "$APXS"; then
+	BINNAME=mod_suid.so
+	APXS_CC="`$APXS -q CC`"
+	APXS_INCLUDE="`$APXS -q INCLUDEDIR`"
+	APXS_LIBEXEC="`$APXS -q LIBEXECDIR`"
+
+	INCLUDE="$INCLUDE -I$APXS_INCLUDE"
+	INSTALL_IT="mkdir -p \$(INSTALL_ROOT)$APXS_LIBEXEC && \
+\$(APXS) -S LIBEXECDIR=\$(INSTALL_ROOT)$APXS_LIBEXEC -i -n suid $BINNAME"
+	AC_SUBST(APXS)
+	AC_SUBST(BINNAME)
+	AC_SUBST(INSTALL_IT)
+	AC_SUBST(APXS_INCLUDE)
+	AC_SUBST(APXS_LIBEXEC)
+	
+	AC_MSG_RESULT(found at $APXS)
+else
+	AC_MSG_RESULT(no)
+fi
+
+if test -n "$APXS"; then
+	if test -z "`$APXS -q LD_SHLIB`" || test "$APXS_LIBEXEC" = "modules"; then
+		AC_MSG_ERROR(
+[ Your APXS installation is broken and cannot be used.])
+	fi
+fi
+
+AC_CHECK_FUNC(setresuid,
+[
+	AC_DEFINE(HAVE_SETRESUID, 1, [ Define to 1 if you have the `setresuid' function ])
+],
+[
+	AC_MSG_ERROR(You need an OS with has the setresuid system call)
+]
+)
+
+AC_CHECK_FUNC(setresgid,
+[
+	AC_DEFINE(HAVE_SETRESGID, 1, [ Define to 1 if you have the `setresgid' function ])
+],
+[
+	AC_MSG_ERROR(You need an OS with has the setresgid system call)
+]
+)
+
+AC_OUTPUT(Makefile)
